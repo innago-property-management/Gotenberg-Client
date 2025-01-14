@@ -6,8 +6,6 @@ name: .NET
 on:
   push:
     branches: [ "**" ]
-    branches-ignore:
-      - 'main'
     tags:
       - "*"
   pull_request:
