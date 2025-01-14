@@ -22,14 +22,43 @@ jobs:
         dotnet-version: 9.0.x
     - name: Add Nuget Source
       run: |
-        dotnet nuget add source \
-          --username ${{ secrets.PACKAGE_WRITE_USERNAME }} \
-          --password ${{ secrets.PACKAGE_WRITE_TOKEN }} \
-          --store-password-in-clear-text 
-          --name github "https://nuget.pkg.github.com/innago-property-management/index.json"
+        dotnet nuget add source --username ${{ secrets.PACKAGE_WRITE_USERNAME }} --password ${{ secrets.PACKAGE_WRITE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/innago-property-management/index.json"
+    - name: Extract Branch Name
+      run: echo "BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
+    - name: Get Latest Tag
+      run: |
+        git fetch --tags
+        latest_tag=$(git tag -l --sort=v:refname | tail -n 1)
+        latest_tag=${latest_tag:-0.0.1}
+        echo "current version is: $latest_tag"
+        echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+        TAG=$(git describe --exact-match --tags || echo "")
+        if [ -z "$TAG" ]; then
+          BRANCH=$(git branch --show-current)
+          if [ "$BRANCH" == "main" ]; then
+            echo "VERSION=$latest_tag-rc-${{ github.run_number }}" >> $GITHUB_ENV
+            echo "ASSEMBLY_VERSION=$latest_tag.${{ github.run_number }}" >> $GITHUB_ENV
+          else
+            echo "VERSION=$latest_tag-feat-${{ github.run_number }}" >> $GITHUB_ENV
+            echo "ASSEMBLY_VERSION=$latest_tag.${{ github.run_number }}" >> $GITHUB_ENV
+          fi
+        else
+          echo "VERSION=$TAG" >> $GITHUB_ENV
+          echo "ASSEMBLY_VERSION=$TAG" >> $GITHUB_ENV
+        fi
+        echo "$VERSION $ASSEMBLY_VERSION"
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: |
+        dotnet build --no-restore --configuration Release -p:Version="${{ env.VERSION }}" -p:AssemblyVersion="${{ env.ASSEMBLY_VERSION }}"
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: |
+        dotnet test --no-build --verbosity normal -p:CollectCoverage=true
+    - name: Publish
+      if: env.BRANCH == 'main'
+      run: |
+        SOURCE_ROOT=${SOURCE_ROOT:-"src"}
+        for file in "$SOURCE_ROOT"/**/bin/Release/*.nupkg; do
+          dotnet nuget push "$file" --source github --skip-duplicate
+        done
