@@ -30,6 +30,7 @@ jobs:
         latest_tag=$(git tag -l --sort=v:refname | tail -n 1)
         latest_tag=${latest_tag:-0.0.1}
         echo "current version is: $latest_tag"
+        echo "LATEST_VERSION=$latest_version" >> $GITHUB_ENV
         MAJOR=$(echo "$latest_tag" | cut -d. -f1 | sed 's/[^0-9]//g')
         MINOR=$(echo "$latest_tag" | cut -d. -f2)
         PATCH=$(echo "$latest_tag" | cut -d. -f3)
@@ -67,7 +68,7 @@ jobs:
       run: |
         dotnet test --no-build --verbosity normal -p:CollectCoverage=true
     - name: Publish
-      if: env.BRANCH == 'main'
+      if: env.BRANCH == 'main' || env.BRANCE == env.LATEST_VERSION
       run: |        
         dotnet nuget add source --username ${{ secrets.PACKAGE_WRITE_USERNAME }} --password ${{ secrets.PACKAGE_WRITE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/innago-property-management/index.json"
         SOURCE_ROOT=${SOURCE_ROOT:-"src"}
