@@ -41,7 +41,7 @@ jobs:
       run: |
         dotnet test --no-build --verbosity normal -p:CollectCoverage=true
     - name: Publish
-      if: emv.BRANCH == 'main'
+      if: env.BRANCH == 'main'
       run: |
         SOURCE_ROOT=${SOURCE_ROOT:-"src"}
         for file in "$SOURCE_ROOT"/**/bin/Release/*.nupkg; do
