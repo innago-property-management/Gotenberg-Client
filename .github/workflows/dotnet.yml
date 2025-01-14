@@ -39,9 +39,9 @@ jobs:
         dotnet build --no-restore --configuration Release -p:Version="$VERSION" -p:AssemblyVersion="$VERSION"
     - name: Test
       run: |
-        dotnet test --no-build --verbosity normal /p:CollectCoverage=true
+        dotnet test --no-build --verbosity normal -p:CollectCoverage=true
     - name: Publish
-      if: "$BRANCH" == 'main'
+      if: emv.BRANCH == 'main'
       run: |
         SOURCE_ROOT=${SOURCE_ROOT:-"src"}
         for file in "$SOURCE_ROOT"/**/bin/Release/*.nupkg; do
