@@ -23,9 +23,26 @@ jobs:
     - name: Add Nuget Source
       run: |
         dotnet nuget add source --username ${{ secrets.PACKAGE_WRITE_USERNAME }} --password ${{ secrets.PACKAGE_WRITE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/innago-property-management/index.json"
+    - name: Extract Branch Name
+      run: echo "BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
+    - name: Semver
+      id: semver
+      uses: ietf-tools/semver-action@v1.9.0
+      with:
+        token: ${{ secrets.SEMVER_TOKEN }}
+    - name: Version Variable
+      run: echo "VERSION=${{ steps.semver.outputs.nextStrict }}" >> "$GITHUB_ENV"
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: |
+        dotnet build --no-restore --configuration Release -p:Version="$VERSION" -p:AssemblyVersion="$VERSION"
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Publish
+      if: "$BRANCH" == 'main'
+      run: |
+        SOURCE_ROOT=${SOURCE_ROOT:-"src"}
+        for file in "$SOURCE_ROOT"/**/bin/Release/*.nupkg; do
+          dotnet nuget push "$file" --source github --skip-duplicate
+        done
