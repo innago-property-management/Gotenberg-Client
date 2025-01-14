@@ -22,11 +22,7 @@ jobs:
         dotnet-version: 9.0.x
     - name: Add Nuget Source
       run: |
-        dotnet nuget add source \
-          --username ${{ secrets.PACKAGE_WRITE_USERNAME }} \
-          --password ${{ secrets.PACKAGE_WRITE_TOKEN }} \
-          --store-password-in-clear-text 
-          --name github "https://nuget.pkg.github.com/innago-property-management/index.json"
+        dotnet nuget add source --username ${{ secrets.PACKAGE_WRITE_USERNAME }} --password ${{ secrets.PACKAGE_WRITE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/innago-property-management/index.json"
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
