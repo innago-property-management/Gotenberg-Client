@@ -38,7 +38,7 @@ jobs:
       run: |
         dotnet build --no-restore --configuration Release -p:Version="$VERSION" -p:AssemblyVersion="$VERSION"
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity=normal /p:CollectCoverage=true
     - name: Publish
       if: "$BRANCH" == 'main'
       run: |
