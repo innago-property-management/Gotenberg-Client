@@ -31,16 +31,28 @@ jobs:
         latest_tag=$(git tag -l --sort=v:refname | tail -n 1)
         latest_tag=${latest_tag:-0.0.1}
         echo "current version is: $latest_tag"
-        echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+        MAJOR=$(echo "$latest_tag" | cut -d. -f1 | sed 's/[^0-9]//g')
+        MINOR=$(echo "$latest_tag" | cut -d. -f2)
+        PATCH=$(echo "$latest_tag" | cut -d. -f3)
+        PATCH=$((PATCH + 1))
+        NEW_TAG="${MAJOR}.${MINOR}.${PATCH}"
+        NEXT_VERSION=$(cat NEXT_VERSION || echo "0.0.0")
+        if [[ $(echo -e "$NEW_TAG\n$NEXT_VERSION" | sort -V | head -n1) == "$NEXT_VERSION" ]]; then
+            echo "NEXT_VERSION ($NEXT_VERSION) is greater than NEW_TAG ($NEW_TAG)"
+            NEW_TAG="$NEXT_VERSION"
+        else
+          echo "NEXT_VERSION ($NEXT_VERSION) is not greater than NEW_TAG ($NEW_TAG)"
+        fi
+        echo "Next tag: $NEW_TAG"
         TAG=$(git describe --exact-match --tags || echo "")
         if [ -z "$TAG" ]; then
           BRANCH=$(git branch --show-current)
           if [ "$BRANCH" == "main" ]; then
-            echo "VERSION=$latest_tag-rc-${{ github.run_number }}" >> $GITHUB_ENV
-            echo "ASSEMBLY_VERSION=$latest_tag.${{ github.run_number }}" >> $GITHUB_ENV
+            echo "VERSION=$NEW_TAG-rc-${{ github.run_number }}" >> $GITHUB_ENV
+            echo "ASSEMBLY_VERSION=$NEW_TAG.${{ github.run_number }}" >> $GITHUB_ENV
           else
-            echo "VERSION=$latest_tag-feat-${{ github.run_number }}" >> $GITHUB_ENV
-            echo "ASSEMBLY_VERSION=$latest_tag.${{ github.run_number }}" >> $GITHUB_ENV
+            echo "VERSION=$NEW_TAG-feat-${{ github.run_number }}" >> $GITHUB_ENV
+            echo "ASSEMBLY_VERSION=$NEW_TAG.${{ github.run_number }}" >> $GITHUB_ENV
           fi
         else
           echo "VERSION=$TAG" >> $GITHUB_ENV
