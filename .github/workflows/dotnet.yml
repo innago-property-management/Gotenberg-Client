@@ -30,6 +30,9 @@ jobs:
       uses: ietf-tools/semver-action@v1.9.0
       with:
         token: ${{ secrets.SEMVER_TOKEN }}
+        fallbackTag: '1.0.0'
+        noNewCommitBehavior: 'silent'
+        noVersionBumpBehavior: 'patch'
     - name: Version Variable
       run: echo "VERSION=${{ steps.semver.outputs.nextStrict }}" >> "$GITHUB_ENV"
     - name: Restore dependencies
