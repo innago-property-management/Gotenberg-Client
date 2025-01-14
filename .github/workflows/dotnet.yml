@@ -51,7 +51,7 @@ jobs:
       run: dotnet restore
     - name: Build
       run: |
-        dotnet build --no-restore --configuration Release -p:Version="{{ env.VERSION }}" -p:AssemblyVersion="${{ env.ASSEMBLY_VERSION }}"
+        dotnet build --no-restore --configuration Release -p:Version="${{ env.VERSION }}" -p:AssemblyVersion="${{ env.ASSEMBLY_VERSION }}"
     - name: Test
       run: |
         dotnet test --no-build --verbosity normal -p:CollectCoverage=true
