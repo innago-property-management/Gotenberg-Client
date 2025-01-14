@@ -20,9 +20,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
-    - name: Add Nuget Source
-      run: |
-        dotnet nuget add source --username ${{ secrets.PACKAGE_WRITE_USERNAME }} --password ${{ secrets.PACKAGE_WRITE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/innago-property-management/index.json"
     - name: Extract Branch Name
       run: echo "BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
     - name: Get Latest Tag
@@ -69,8 +66,9 @@ jobs:
         dotnet test --no-build --verbosity normal -p:CollectCoverage=true
     - name: Publish
       if: env.BRANCH == 'main'
-      run: |
+      run: |        
+        dotnet nuget add source --username ${{ secrets.PACKAGE_WRITE_USERNAME }} --password ${{ secrets.PACKAGE_WRITE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/innago-property-management/index.json"
         SOURCE_ROOT=${SOURCE_ROOT:-"src"}
         for file in "$SOURCE_ROOT"/**/bin/Release/*.nupkg; do
-          dotnet nuget push "$file" --source github --skip-duplicate --api-key ${{ secrets.GITHUB_TOKEN }}
+          dotnet nuget push "$file" --source github --skip-duplicate
         done
