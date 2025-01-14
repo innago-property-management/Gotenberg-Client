@@ -72,5 +72,5 @@ jobs:
       run: |
         SOURCE_ROOT=${SOURCE_ROOT:-"src"}
         for file in "$SOURCE_ROOT"/**/bin/Release/*.nupkg; do
-          dotnet nuget push "$file" --source github --skip-duplicate
+          dotnet nuget push "$file" --source github --skip-duplicate --api-key ${{ secrets.GITHUB_TOKEN }}
         done
