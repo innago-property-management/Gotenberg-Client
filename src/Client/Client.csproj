@@ -4,6 +4,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>Innago.Gotenberg.Client</AssemblyName>
+    <RootNamespace>Innago.Gotenberg.Client</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Innago.Gotenberg.Client</PackageId>
+    <Title>Innago.Gotenberg.Client</Title>
+    <Authors>Innago</Authors>
   </PropertyGroup>
 
   <ItemGroup>
