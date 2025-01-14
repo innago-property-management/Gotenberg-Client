@@ -33,21 +33,24 @@ jobs:
         echo "current version is: $latest_tag"
         echo "latest_tag=$latest_tag" >> $GITHUB_ENV
         TAG=$(git describe --exact-match --tags || echo "")
-          if [ -z "$TAG" ]; then
-            BRANCH=$(git branch --show-current)
-            if [ "$BRANCH" == "main" ]; then
-              echo "VERSION=$latest_tag-rc-${{ github.run_number }}" >> $GITHUB_ENV
-            else
-              echo "VERSION=$latest_tag-feat-${{ github.run_number }}" >> $GITHUB_ENV
-            fi
+        if [ -z "$TAG" ]; then
+          BRANCH=$(git branch --show-current)
+          if [ "$BRANCH" == "main" ]; then
+            echo "VERSION=$latest_tag-rc-${{ github.run_number }}" >> $GITHUB_ENV
+            echo "ASSEMBLY_VERSION=$latest_tag.${{ github.run_number }}" >> $GITHUB_ENV
           else
-            echo "VERSION=$TAG" >> $GITHUB_ENV
+            echo "VERSION=$latest_tag-feat-${{ github.run_number }}" >> $GITHUB_ENV
+            echo "ASSEMBLY_VERSION=$latest_tag.${{ github.run_number }}" >> $GITHUB_ENV
           fi
+        else
+          echo "VERSION=$TAG" >> $GITHUB_ENV
+          echo "ASSEMBLY_VERSION=$TAG" >> $GITHUB_ENV
+        fi
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
       run: |
-        dotnet build --no-restore --configuration Release -p:Version="$VERSION" -p:AssemblyVersion="$VERSION"
+        dotnet build --no-restore --configuration Release -p:Version="$VERSION" -p:AssemblyVersion="${{ env.ASSEMBLY_VERSION }}-"
     - name: Test
       run: |
         dotnet test --no-build --verbosity normal -p:CollectCoverage=true
