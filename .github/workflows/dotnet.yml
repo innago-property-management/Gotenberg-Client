@@ -27,13 +27,11 @@ jobs:
       run: echo "BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
     - name: Semver
       id: semver
-      uses: ietf-tools/semver-action@v1.9.0
+      uses: gandarez/semver-action@v2.0.0
       with:
-        token: ${{ secrets.SEMVER_TOKEN }}
-        noNewCommitBehavior: 'silent'
-        noVersionBumpBehavior: 'patch'
+        branching_model: "trunk-based"
     - name: Version Variable
-      run: echo "VERSION=${{ steps.semver.outputs.nextStrict }}" >> "$GITHUB_ENV"
+      run: echo "VERSION=${{ steps.semver.outputs.semver_tag }}" >> "$GITHUB_ENV"
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
