@@ -26,7 +26,7 @@ jobs:
       run: echo "BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
     - name: Get Latest Tag
       run: |
-        git fetch --tags
+        git fetch
         latest_tag=$(git tag -l --sort=v:refname | tail -n 1)
         latest_tag=${latest_tag:-0.0.1}
         echo "current version is: $latest_tag"
